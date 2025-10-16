@@ -6,63 +6,63 @@
 # @Software: PyCharm
 
 """
-To-do lists:
-    1) The Python implementation of DFS(Depth-First Search) and IDDFS(Iterative Deepening Depth-First Search)
-    2) The comparison of solution time for N-Queen, for N = 4, 8, 16, 32, 64, 128.
-    3) A one-page report on the performance comparison and your thoughts about implementing the solution.
+To-do list:
+    1) Implement DFS (Depth-First Search) and IDDFS (Iterative Deepening Depth-First Search) in Python.
+    2) Compare the solution time for the N-Queens problem for N = 4, 8, 16, 32, 64, 128.
+    3) Write a one-page report on performance comparison and your thoughts on the implementation.
 """
 import time
+
 
 def dfs_method(n):
     start_time = time.time()
     solution = []
-    # 储存找到的解
+    # Store all found solutions
 
     position = [-1] * n
-    # 长度为n的列表，index来表示行，value表示列
+    # A list of length n: index represents the row, value represents the column
 
     def rules_checker(position, row, col):
         for r in range(row):
-            c = position[r] # 遍历已经放好的皇后 每个皇后的坐标是 (r, c)
-            if ((c == col) # 如果之前某个皇后 c 的列号和现在要放的 col 相同
-            or (abs(row - r) == abs(col - c))): # 如果两个皇后行号的差和列号的差相同 那它们就在同一条对角线上
+            c = position[r]  # Iterate through already placed queens, each has coordinates (r, c)
+            if ((c == col)  # Same column
+            or (abs(row - r) == abs(col - c))):  # Same diagonal
                 return False
         return True
 
     def dfs(row):
         """
-        DFS（深度优先搜索）的思路是：
-        我先放好第 0 行，再去放第 1 行，再放第 2 行……
-        一直放到最后一行，如果都能放下，那就找到一个完整的解。
-        如果 row == n，说明所有行都放好了
+        The idea of DFS (Depth-First Search) is:
+        Place a queen in row 0, then row 1, then row 2, and so on.
+        If all rows are successfully filled, a valid solution is found.
+        When row == n, all rows are filled.
 
-        我们把整个 dfs(row) 看成一棵 递归树 的节点。
-        每个节点表示：当前在第 row 行放皇后；
-        每条路径表示：从第 0 行放到第 row 行的一种尝试；
-        当走到 row == n 时，就走到了一条完整路径的底部（即一个成功的方案）。
+        Think of dfs(row) as a node in a recursion tree.
+        Each node represents placing a queen in a certain row.
+        Each path represents an attempt from row 0 up to row n-1.
+        When row == n, we reach a leaf node (a successful solution).
         """
         if row == n:
-            # position 是一个可变列表，它会在回溯时被修改。
-            # 如果直接保存 position 本身，那么以后它会被覆盖。
+            # position is mutable; copy it to avoid being overwritten during backtracking
             solution.append(position.copy())
             return
 
         for col in range(n):
             if rules_checker(position, row, col):
-                position[row] = col # 把皇后放在 (row, col) 位置上
-                dfs(row + 1) # 第 row 行放好了，接下来去放第 row+1 行的皇后
-                position[row] = -1 # 回溯
+                position[row] = col  # Place queen at (row, col)
+                dfs(row + 1)         # Proceed to the next row
+                position[row] = -1   # Backtrack
 
-    dfs(0) # 启动递归，从第 0 行开始搜索
+    dfs(0)  # Start recursion from row 0
     end_time = time.time()
 
     elapsed_time = end_time - start_time
     return solution, elapsed_time
 
+
 def iddfs_method(n):
     """
-    IDDFS其实是带深度限制的 DFS，在此基础上加了逐步加深的机制
-
+    IDDFS is essentially a DFS with depth limitation, combined with a gradual deepening mechanism.
     """
 
     start_time = time.time()
@@ -71,17 +71,15 @@ def iddfs_method(n):
 
     def rules_checker(position, row, col):
         for r in range(row):
-            c = position[r]  # 遍历已经放好的皇后 每个皇后的坐标是 (r, c)
-            if ((c == col)  # 如果之前某个皇后 c 的列号和现在要放的 col 相同
-            or (abs(row - r) == abs(col - c))):  # 如果两个皇后行号的差和列号的差相同 那它们就在同一条对角线上
+            c = position[r]
+            if ((c == col)
+            or (abs(row - r) == abs(col - c))):
                 return False
-
         return True
 
     def depth_limited_collector(row, limit):
         if row == n:
-            # position 是一个可变列表，它会在回溯时被修改。
-            # 如果直接保存 position 本身，那么以后它会被覆盖。
+            # Copy position to preserve the found solution
             solutions.append(position.copy())
             return
         if row == limit:
@@ -89,16 +87,17 @@ def iddfs_method(n):
         for col in range(n):
             if rules_checker(position, row, col):
                 position[row] = col
-                depth_limited_collector(row + 1, limit) # 递归
-                position[row] = -1 # 回溯
+                depth_limited_collector(row + 1, limit)  # Recursive call
+                position[row] = -1  # Backtrack
 
-    # 从浅到深搜索，这也是为什么它叫iddfs算法
+    # Search from shallow to deep — that’s why it’s called IDDFS
     for limit in range(1, n + 1):
         depth_limited_collector(0, limit)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
     return solutions, elapsed_time
+
 
 def print_board(position):
     n = len(position)
@@ -110,56 +109,50 @@ def print_board(position):
     print("\n")
 
 
-
-
 while True:
 
     print("*" * 80)
-    print("This program implements DFS and IDDFS to solve N-Queen problem.")
-    print("1. To solve the problem with DFS")
-    print("2. To solve the problem with IDDFS")
-    print("3. To solve the problem and compare the performance of DFS and IDDFS")
+    print("This program implements DFS and IDDFS to solve the N-Queens problem.")
+    print("1. Solve the problem using DFS")
+    print("2. Solve the problem using IDDFS")
+    print("3. Solve the problem and compare the performance of DFS and IDDFS")
     print("4. Exit the program\n")
     print("*" * 80)
-    selection = int(input("Please select your choice using 1/2/3/4: "))
-
+    selection = int(input("Please select your choice (1/2/3/4): "))
 
     try:
         if selection == 1:
-            n = int(input("Please enter the number of n: "))
-            print("Now we solve N-Queen problem with DFS...")
+            n = int(input("Please enter the value of n: "))
+            print("Solving the N-Queens problem with DFS...")
 
             solutions, cost_time = dfs_method(n)
-            print(f"DFS 解决 {n} 皇后用了 {cost_time:.6f} 秒，共找到 {len(solutions)} 个解。")
-            print("Now we display the last 3 solutions...")
-            for i in solutions[-3:]: # 打印后三个解
+            print(f"DFS solved {n}-Queens in {cost_time:.6f} seconds, finding {len(solutions)} solutions.")
+            print("Displaying the last 3 solutions...")
+            for i in solutions[-3:]:
                 print_board(i)
             print("*" * 80)
 
         elif selection == 2:
-            n = int(input("Please enter the number of n: "))
-            print("Now we solve N-Queen problem with IDDFS...")
+            n = int(input("Please enter the value of n: "))
+            print("Solving the N-Queens problem with IDDFS...")
 
             solutions, cost_time = iddfs_method(n)
-            print(f"IDDFS 解决 {n} 皇后用了 {cost_time:.6f} 秒，共找到 {len(solutions)} 个解。")
-            print("Now we display the last 3 solutions...")
-            for i in solutions[-3:]:  # 打印后三个解
+            print(f"IDDFS solved {n}-Queens in {cost_time:.6f} seconds, finding {len(solutions)} solutions.")
+            print("Displaying the last 3 solutions...")
+            for i in solutions[-3:]:
                 print_board(i)
             print("*" * 80)
 
-
         elif selection == 3:
-
-            n = int(input("Please enter the number of n: "))
-
-            print("Now we compare the performance of DFS and IDDFS...")
+            n = int(input("Please enter the value of n: "))
+            print("Comparing the performance of DFS and IDDFS...")
 
             dfs_solutions, dfs_time = dfs_method(n)
             iddfs_solutions, iddfs_time = iddfs_method(n)
 
-            print(f"\nDFS 用时: {dfs_time:.6f} 秒，共 {len(dfs_solutions)} 个解")
-            print(f"IDDFS 用时: {iddfs_time:.6f} 秒，共 {len(iddfs_solutions)} 个解")
-            print(f"\nDFS 比 IDDFS 大约快了 {iddfs_time / dfs_time:.2f} 倍 ")
+            print(f"\nDFS time: {dfs_time:.6f} seconds, {len(dfs_solutions)} solutions found.")
+            print(f"IDDFS time: {iddfs_time:.6f} seconds, {len(iddfs_solutions)} solutions found.")
+            print(f"\nDFS is approximately {iddfs_time / dfs_time:.2f} times faster than IDDFS.")
             print("*" * 80)
 
         elif selection == 4:
@@ -167,11 +160,4 @@ while True:
             quit()
 
     except ValueError:
-        print("Invalid input, please try again.")
-
-
-
-
-
-
-
+        print("Invalid input. Please try again.")

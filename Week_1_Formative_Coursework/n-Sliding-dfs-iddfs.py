@@ -6,10 +6,10 @@
 # @Software: PyCharm
 
 """
-To-do lists:
-    1) The Python implementation of DFS(Depth-First Search) and IDDFS(Iterative Deepening Depth-First Search)
-    2) The comparison of solution time for Tile problem, for N = 4, 8, 16, 32, 64, 128.
-    3) A one-page report on the performance comparison and your thoughts about implementing the solution.
+To-do list:
+    1) Implement DFS (Depth-First Search) and IDDFS (Iterative Deepening Depth-First Search) in Python.
+    2) Compare solution times for the Tile Puzzle for N = 4, 8, 16, 32, 64, 128.
+    3) Write a one-page report comparing performance and discussing your implementation insights.
 """
 
 import random, time, heapq
@@ -22,65 +22,49 @@ def generate_state(n):
 
 def get_neighbors(state, n):
     neighbors = []
-    zero_index = state.index(0) # 取0的索引
-    x,y = divmod(zero_index,n) # 一维索引 -> 二维坐标
+    zero_index = state.index(0)  # Index of the blank tile (0)
+    x, y = divmod(zero_index, n)  # Convert 1D index -> 2D coordinates
 
     moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    for dx, dy in moves:  # 如果一个列表里装的是 tuple，我们可以在 for 循环里同时取出 tuple 的两个元素
+    for dx, dy in moves:
         nx, ny = x + dx, y + dy
         if 0 <= nx < n and 0 <= ny < n:
-            new_index = nx * n + ny  # 一维索引 = 行号 × 每行的长度 + 列号
+            new_index = nx * n + ny  # 2D -> 1D index
             new_state = list(state)
-            # 交换位置
-            new_state[zero_index], new_state[new_index] = new_state[new_index], new_state[zero_index] # 无需新增临时变量的方法（涉及元组）
+            # Swap blank with neighbor
+            new_state[zero_index], new_state[new_index] = new_state[new_index], new_state[zero_index]
             neighbors.append(tuple(new_state))
 
     return neighbors
 
 def print_board(state, n):
-    for i in range(n):  # 我们要打印一块 n×n 的拼图，所以自然需要打印 n 行
-        row = state[i * n:(i + 1) * n]  #从一维的 tuple 中，切出对应行的元素
-        print(' '.join(str(x) if x != 0 else ' ' for x in row))  # 把多个字符串连接成一行，中间用空格 ' ' 分隔 对于每一个 x（也就是这一行中的一个格子），如果 x != 0（不是空格），就返回 str(x)（数字转成字符串）；否则返回 ' '（空白格）。
-    print()  # 空行分隔状态
+    for i in range(n):
+        row = state[i * n:(i + 1) * n]
+        print(' '.join(str(x) if x != 0 else ' ' for x in row))
+    print()
 
 def count_inversions(state):
     inversions = 0
-    arr = [x for x in state if x != 0] # 过滤空格->0
-    """
-    等价写法：
-    arr = []
-    for x in state:
-        if x != 0:
-            arr.append(x)
-    """
+    arr = [x for x in state if x != 0]  # Filter out the blank (0)
     for i in range(len(arr)):
         for j in range(i + 1, len(arr)):
             if arr[i] > arr[j]:
                 inversions += 1
-    """
-    更python的写法
-    for i in range(len(arr)):
-    inversions += sum(1 for j in range(i + 1, len(arr)) if arr[i] > arr[j])
-    """
-
     return inversions
 
 def is_solvable(state, n):
-
     inversions = count_inversions(state)
     zero_index = state.index(0)
-    zero_row_from_bottom = n - (zero_index // n)  # 从下往上第几行（1-based）
+    zero_row_from_bottom = n - (zero_index // n)  # Row number from bottom (1-based)
 
     if n % 2 == 1:
-        # n 是奇数，只看逆序数
+        # Odd n: solvable if inversion count is even
         return inversions % 2 == 0
     else:
-        # n 是偶数，要考虑空格所在的行
+        # Even n: depends on blank tile row
         if zero_row_from_bottom % 2 == 0:
-            # 空格在从下往上偶数行
             return inversions % 2 == 1
         else:
-            # 空格在从下往上奇数行
             return inversions % 2 == 0
 
 def generate_solvable_state(n):
@@ -89,22 +73,20 @@ def generate_solvable_state(n):
         if is_solvable(state, n):
             return state
 
-def dfs(state, goal, n, visited, path, stats, depth_limit = 30):
-
+def dfs(state, goal, n, visited, path, stats, depth_limit=30):
     stats["visited"] += 1
     if stats["visited"] % 100000 == 0:
-        print(f"已探索 {stats['visited']} 个节点...")
-    path.append(state) # 当前节点加入路径
+        print(f"Explored {stats['visited']} nodes so far...")
+    path.append(state)
 
     if state == goal:
-        return path  # 找到目标
+        return path
 
-    # 到达深度限制，回溯
     if depth_limit == 0:
         path.pop()
         return None
 
-    visited.add(state) # 防止走回头路
+    visited.add(state)
 
     for neighbor in get_neighbors(state, n):
         if neighbor not in visited:
@@ -112,9 +94,6 @@ def dfs(state, goal, n, visited, path, stats, depth_limit = 30):
             if result:
                 return result
 
-    # 在所有子节点都访问完、并且没有找到解之后，
-    # 我们准备返回上一层，这时候应该清除当前节点标记
-    # 回溯清理
     visited.remove(state)
     path.pop()
     return None
@@ -129,24 +108,23 @@ def solve_dfs(initial_state, goal_state, n, max_depth=30):
     return result, stats["visited"], elapsed
 
 def run_dfs(initial_state, goal_state, n, max_depth=30):
-    print("\n开始 DFS 搜索...")
+    print("\nStarting DFS search...")
     result, visited, elapsed_time = solve_dfs(initial_state, goal_state, n, max_depth)
-    print(f"总共访问节点：{visited} 个")
+    print(f"Total nodes visited: {visited}")
     if result:
-        print(f"找到解，共 {len(result) - 1} 步，用时 {elapsed_time:.4f} 秒")
-        print("\n最后三步：")
+        print(f"Solution found in {len(result) - 1} steps, time: {elapsed_time:.4f} seconds")
+        print("\nLast three steps:")
         for step in result[-3:]:
             print_board(step, n)
     else:
-        print(f"未在深度 {max_depth} 内找到解，用时 {elapsed_time:.4f} 秒")
+        print(f"No solution found within depth {max_depth}, time: {elapsed_time:.4f} seconds")
 
 def iddfs(initial_state, goal_state, n, max_depth=30):
-
     start_time = time.time()
     stats = {"visited": 0}
 
-    for depth in range(max_depth + 1):  # 从0层开始，一层层加深
-        print(f"当前深度限制：{depth}")
+    for depth in range(max_depth + 1):
+        print(f"Current depth limit: {depth}")
         visited = set()
         path = []
         result = dfs(initial_state, goal_state, n, visited, path, stats, depth)
@@ -157,18 +135,16 @@ def iddfs(initial_state, goal_state, n, max_depth=30):
     return None, stats["visited"], elapsed
 
 def run_iddfs(initial_state, goal_state, n, max_depth=30):
-    print("\n开始 IDDFS 搜索...")
+    print("\nStarting IDDFS search...")
     result, visited, elapsed = iddfs(initial_state, goal_state, n, max_depth)
-    print(f"总共访问节点：{visited} 个")
+    print(f"Total nodes visited: {visited}")
     if result:
-        print(f"找到解，共 {len(result) - 1} 步，用时 {elapsed:.4f} 秒")
-        print("\n最后三步：")
+        print(f"Solution found in {len(result) - 1} steps, time: {elapsed:.4f} seconds")
+        print("\nLast three steps:")
         for step in result[-3:]:
             print_board(step, n)
     else:
-        print(f"未在深度 {max_depth} 内找到解，用时 {elapsed:.4f} 秒")
-
-
+        print(f"No solution found within depth {max_depth}, time: {elapsed:.4f} seconds")
 
 def a_star(initial_state, goal_state, n):
     def manhattan_distance(state):
@@ -201,20 +177,19 @@ def a_star(initial_state, goal_state, n):
                 new_f = new_g + manhattan_distance(neighbor)
                 heapq.heappush(open_list, (new_f, new_g, neighbor, path + [state]))
 
-    # 若未找到解
     return path + [state], steps, time.time() - start_time
 
 def run_a_star(initial_state, goal_state, n):
-    print("\n开始 A* 搜索...")
+    print("\nStarting A* search...")
     result, visited, cost = a_star(initial_state, goal_state, n)
-    print(f"总共访问节点：{visited} 个")
+    print(f"Total nodes visited: {visited}")
     if result:
-        print(f" 找到解，共 {len(result) - 1} 步，用时 {cost:.4f} 秒")
-        print("\n最后三步：")
+        print(f"Solution found in {len(result) - 1} steps, time: {cost:.4f} seconds")
+        print("\nLast three steps:")
         for step in result[-3:]:
             print_board(step, n)
     else:
-        print(f" 未找到解。用时 {cost:.4f} 秒")
+        print(f"No solution found. Time: {cost:.4f} seconds")
 
 def ida_star(initial_state, goal_state, n):
     def manhattan_distance(state):
@@ -229,7 +204,7 @@ def ida_star(initial_state, goal_state, n):
         node = path[-1]
         f = g + manhattan_distance(node)
         if f > bound:
-            return f, None  #  修复：返回两个值
+            return f, None
         if node == goal_state:
             return "FOUND", path.copy()
         min_bound = float("inf")
@@ -242,7 +217,7 @@ def ida_star(initial_state, goal_state, n):
                 if result < min_bound:
                     min_bound = result
                 path.pop()
-        return min_bound, None  #  修复：返回两个值
+        return min_bound, None
 
     bound = manhattan_distance(initial_state)
     path = [initial_state]
@@ -259,111 +234,110 @@ def ida_star(initial_state, goal_state, n):
         bound = result
 
 def run_ida_star(initial_state, goal_state, n):
-    print("\n开始 IDA* 搜索...")
+    print("\nStarting IDA* search...")
     result, visited, cost = ida_star(initial_state, goal_state, n)
-    print(f"总共访问节点：{visited} 个")
+    print(f"Total nodes visited: {visited}")
     if result:
-        print(f" 找到解，共 {len(result) - 1} 步，用时 {cost:.4f} 秒")
-        print("\n最后三步：")
+        print(f"Solution found in {len(result) - 1} steps, time: {cost:.4f} seconds")
+        print("\nLast three steps:")
         for step in result[-3:]:
             print_board(step, n)
     else:
-        print(f" 未找到解。用时 {cost:.4f} 秒")
+        print(f"No solution found. Time: {cost:.4f} seconds")
 
 def run_interface():
     while True:
         print("*" * 80)
         print(" Sliding Puzzle Solver — DFS / IDDFS / A* / IDA* ")
-        print("1. 用 DFS 求解 --- n请不要超过4")
-        print("2. 用 IDDFS 求解 --- n请不要超过4")
-        print("3. 用 A* 求解")
-        print("4. 用 IDA* 求解")
-        print("5. 比较所有算法性能")
-        print("6. 退出程序\n")
+        print("1. Solve with DFS --- recommended n ≤ 4")
+        print("2. Solve with IDDFS --- recommended n ≤ 4")
+        print("3. Solve with A*")
+        print("4. Solve with IDA*")
+        print("5. Compare all algorithm performances")
+        print("6. Exit program\n")
         print("*" * 80)
 
         try:
-            selection = int(input("请输入选项 (1~6): "))
+            selection = int(input("Please enter your choice (1~6): "))
 
             if selection == 6:
-                print("感谢使用，再见！")
+                print("Thank you for using the solver. Goodbye!")
                 break
 
-            n = int(input("请输入拼图尺寸 n（例如 3 表示 3x3 拼图）: "))
+            n = int(input("Enter puzzle size n (e.g., 3 for a 3x3 puzzle): "))
             initial_state = generate_solvable_state(n)
             goal_state = tuple(list(range(1, n ** 2)) + [0])
 
-            print("\n初始状态：")
+            print("\nInitial state:")
             print_board(initial_state, n)
-            print("目标状态：")
+            print("Goal state:")
             print_board(goal_state, n)
             print("=" * 60)
 
             if selection == 1:
-                print(" 使用 DFS 搜索中...")
-                max_depth = int(input("请输入最大深度限制 (默认 30): ") or 30)
+                print("Running DFS...")
+                max_depth = int(input("Enter maximum depth limit (default 30): ") or 30)
                 result, visited, cost = solve_dfs(initial_state, goal_state, n, max_depth)
-                print(f"总共访问节点：{visited} 个")
+                print(f"Total nodes visited: {visited}")
                 if result:
-                    print(f" 找到解，共 {len(result)-1} 步，用时 {cost:.4f} 秒")
-                    print("\n最后三步：")
+                    print(f"Solution found in {len(result)-1} steps, time: {cost:.4f} seconds")
+                    print("\nLast three steps:")
                     for step in result[-3:]:
                         print_board(step, n)
                 else:
-                    print(f" 未在深度限制内找到解。用时 {cost:.4f} 秒")
+                    print(f"No solution found within depth limit. Time: {cost:.4f} seconds")
 
             elif selection == 2:
-                print(" 使用 IDDFS 搜索中...")
-                max_depth = int(input("请输入最大深度限制 (默认 30): ") or 30)
+                print("Running IDDFS...")
+                max_depth = int(input("Enter maximum depth limit (default 30): ") or 30)
                 result, visited, cost = iddfs(initial_state, goal_state, n, max_depth)
-                print(f"总共访问节点：{visited} 个")
+                print(f"Total nodes visited: {visited}")
                 if result:
-                    print(f" 找到解，共 {len(result)-1} 步，用时 {cost:.4f} 秒")
-                    print("\n最后三步：")
+                    print(f"Solution found in {len(result)-1} steps, time: {cost:.4f} seconds")
+                    print("\nLast three steps:")
                     for step in result[-3:]:
                         print_board(step, n)
                 else:
-                    print(f" 未在深度限制内找到解。用时 {cost:.4f} 秒")
+                    print(f"No solution found within depth limit. Time: {cost:.4f} seconds")
 
             elif selection == 3:
-                print(" 使用 A* 搜索中...")
+                print("Running A*...")
                 result, visited, cost = a_star(initial_state, goal_state, n)
-                print(f"总共访问节点：{visited} 个")
+                print(f"Total nodes visited: {visited}")
                 if result:
-                    print(f" 找到解，共 {len(result) - 1} 步，用时 {cost:.4f} 秒")
-                    print("\n最后三步：")
+                    print(f"Solution found in {len(result)-1} steps, time: {cost:.4f} seconds")
+                    print("\nLast three steps:")
                     for step in result[-3:]:
                         print_board(step, n)
                 else:
-                    print(f" 未找到解。用时 {cost:.4f} 秒")
+                    print(f"No solution found. Time: {cost:.4f} seconds")
 
             elif selection == 4:
-                print(" 使用 IDA* 搜索中...")
+                print("Running IDA*...")
                 result, visited, cost = ida_star(initial_state, goal_state, n)
-                print(f"总共访问节点：{visited} 个")
+                print(f"Total nodes visited: {visited}")
                 if result:
-                    print(f" 找到解，共 {len(result)-1} 步，用时 {cost:.4f} 秒")
-                    print("\n最后三步：")
+                    print(f"Solution found in {len(result)-1} steps, time: {cost:.4f} seconds")
+                    print("\nLast three steps:")
                     for step in result[-3:]:
                         print_board(step, n)
                 else:
-                    print(f" 未找到解。用时 {cost:.4f} 秒")
+                    print(f"No solution found. Time: {cost:.4f} seconds")
 
             elif selection == 5:
-                print(" 正在比较所有算法性能...")
-                max_depth = int(input("请输入最大深度限制 (默认 30): ") or 30)
+                print("Comparing algorithm performance...")
+                max_depth = int(input("Enter maximum depth limit (default 30): ") or 30)
 
-                # 依次运行各算法
                 result_dfs, v_dfs, t_dfs = solve_dfs(initial_state, goal_state, n, max_depth)
                 result_iddfs, v_iddfs, t_iddfs = iddfs(initial_state, goal_state, n, max_depth)
                 result_astar, v_astar, t_astar = a_star(initial_state, goal_state, n)
                 result_idastar, v_idastar, t_idastar = ida_star(initial_state, goal_state, n)
 
-                print("\n 性能比较结果：")
-                print(f"DFS     -> {t_dfs:.4f} 秒, 访问 {v_dfs} 个节点")
-                print(f"IDDFS   -> {t_iddfs:.4f} 秒, 访问 {v_iddfs} 个节点")
-                print(f"A*      -> {t_astar:.4f} 秒, 访问 {v_astar} 个节点")
-                print(f"IDA*    -> {t_idastar:.4f} 秒, 访问 {v_idastar} 个节点")
+                print("\nPerformance Comparison:")
+                print(f"DFS     -> {t_dfs:.4f} sec, visited {v_dfs} nodes")
+                print(f"IDDFS   -> {t_iddfs:.4f} sec, visited {v_iddfs} nodes")
+                print(f"A*      -> {t_astar:.4f} sec, visited {v_astar} nodes")
+                print(f"IDA*    -> {t_idastar:.4f} sec, visited {v_idastar} nodes")
 
                 fastest = min([
                     ("DFS", t_dfs),
@@ -372,30 +346,14 @@ def run_interface():
                     ("IDA*", t_idastar)
                 ], key=lambda x: x[1])
 
-                print(f"\n 最快算法：{fastest[0]}，用时 {fastest[1]:.4f} 秒")
+                print(f"\nFastest algorithm: {fastest[0]}, time: {fastest[1]:.4f} seconds")
 
             else:
-                print(" 输入无效，请输入 1~6。")
+                print("Invalid input. Please enter 1~6.")
 
         except ValueError:
-            print(" 输入错误，请输入数字。")
-
+            print("Invalid input. Please enter a number.")
 
 
 if __name__ == "__main__":
     run_interface()
-    # n = 4
-    # initial_state = generate_solvable_state(n)
-    # goal_state = tuple(list(range(1, n ** 2)) + [0])
-    #
-    # print("初始状态：")
-    # print_board(initial_state, n)
-    # print("目标状态：")
-    # print_board(goal_state, n)
-    # print("=" * 40)
-    # run_a_star(initial_state, goal_state, n)
-    # print("=" * 40)
-    # run_ida_star(initial_state, goal_state, n)
-    # run_dfs(initial_state, goal_state, n, max_depth=30)
-    # print("=" * 40)
-    # run_iddfs(initial_state, goal_state, n, max_depth=30)
