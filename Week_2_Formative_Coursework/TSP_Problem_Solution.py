@@ -102,6 +102,25 @@ def best_first_tsp(start, cities, road_distances):
 # ---------------------------
 # Heuristic function (Task 4)
 # ---------------------------
+# Note on heuristic design (Slides 32–34):
+# In the original lecture slides (UK example), h(n) was defined as
+# the straight-line distance from the current city to a fixed goal (e.g., King's Lynn).
+# However, in this ASEAN TSP instance, the problem requires visiting all cities and returning
+# to the start, so the heuristic is generalized to estimate the remaining tour cost.
+# This makes the search a true Traveling Salesman Problem rather than a single-goal search.
+# In the lecture example (UK cities), h(n) represented the straight-line distance
+# from the current city to a single goal city (King’s Lynn).
+# For example:
+#   g(n) = 19.8 (Norwich → G. Yarmouth road distance)
+#   h(n) = 56.9 (G. Yarmouth → King’s Lynn straight-line distance)
+#   f(n) = 76.7
+#
+# In this ASEAN TSP assignment, the problem extends beyond a single goal:
+# we must visit all cities and return to the start city (KUL).
+# Therefore, the heuristic h(n) is generalized to approximate the remaining tour cost:
+#   h(n) = Σ(straight-line distances from the current city to all unvisited cities)
+#        + (straight-line distance from the last unvisited city back to KUL)
+# This generalization maintains admissibility while adapting A* to the TSP domain.
 def heuristic_func(path, start, straight_line_distances, cities):
     """
     Heuristic function h(n): based on sum of straight-line distances
@@ -198,12 +217,12 @@ if __name__ == "__main__":
 # Reflection
 # ======================================================
 """
-Compared with the example of UK cities discussed in class, the ASEAN TSP instance in this assignment was more straightforward to analyze because it involved fewer nodes and the distance data had already been specified. 
+Compared with the UK city example discussed in class, the ASEAN TSP instance in this assignment was more straightforward to analyze because it involved fewer nodes and the distance data were already specified. 
 From an algorithmic perspective, substituting UK cities with ASEAN ones did not alter the fundamental search structure. 
 The heuristic function h(n) still relied on straight-line distance, consistent with the principles outlined in the course slides (Slides 32–33).
-However, in practical geographic terms, ASEAN cities are characterized by more winding road networks and varying elevations, making the straight-line distance a less precise estimator of the actual travel cost.
+However, in practical geographic terms, ASEAN cities are characterized by more winding road networks and varying elevations, making the straight-line distance a less precise estimator of the actual travel cost. 
 While I briefly considered adjusting the heuristic to account for these environmental factors, I ultimately retained the original formulation to ensure that the heuristic remained admissible, as required for demonstrating the optimality of the A* algorithm.
 It is also worth noting that the heuristic formula defined in the assignment—summing the straight-line distances from the current city to all unvisited cities plus the return distance to the start—can slightly overestimate the remaining path cost in larger TSP instances. 
 Nevertheless, for this four-city ASEAN case, the heuristic remains sufficiently accurate for instructional purposes and effectively demonstrates the contrast between uninformed (Best-First) and informed (A*) search strategies. 
-In more complex real-world TSP applications, a tighter admissible heuristic such as one derived from a Minimum Spanning Tree (MST) or nearest-neighbor distance would be preferred to guarantee optimality.
+In more complex real-world TSP applications, a tighter admissible heuristic, such as one derived from a Minimum Spanning Tree (MST) or nearest-neighbor distance, would be preferred to improve efficiency while guaranteeing optimality.
 """
