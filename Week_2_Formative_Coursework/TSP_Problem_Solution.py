@@ -164,7 +164,7 @@ def a_star_tsp(start, cities, road_distances, straight_line_distances):
 if __name__ == "__main__":
 
     cities = ["KUL", "GT", "IPH", "KB"]
-    start = "IPH"
+    start = "KUL"
     num_cities = len(cities)
 
     print("------ASEAN TSP Search------")
@@ -196,7 +196,10 @@ if __name__ == "__main__":
 """
 Compared with the example of UK cities discussed in class, the ASEAN TSP instance in this assignment was more straightforward to analyze because it involved fewer nodes and the distance data had already been specified. 
 From an algorithmic perspective, substituting UK cities with ASEAN ones did not alter the fundamental search structure. 
-The heuristic function h(n) still relied on straight-line distance, consistent with the principles outlined in the course slides. 
-However, in practical geographic terms, ASEAN cities are characterized by more winding road networks and varying elevations, making the straight-line distance a less precise estimator of the actual travel cost. 
+The heuristic function h(n) still relied on straight-line distance, consistent with the principles outlined in the course slides (Slides 32–33).
+However, in practical geographic terms, ASEAN cities are characterized by more winding road networks and varying elevations, making the straight-line distance a less precise estimator of the actual travel cost.
 While I briefly considered adjusting the heuristic to account for these environmental factors, I ultimately retained the original formulation to ensure that the heuristic remained admissible, as required for demonstrating the optimality of the A* algorithm.
+It is also worth noting that the heuristic formula defined in the assignment—summing the straight-line distances from the current city to all unvisited cities plus the return distance to the start—can slightly overestimate the remaining path cost in larger TSP instances. 
+Nevertheless, for this four-city ASEAN case, the heuristic remains sufficiently accurate for instructional purposes and effectively demonstrates the contrast between uninformed (Best-First) and informed (A*) search strategies. 
+In more complex real-world TSP applications, a tighter admissible heuristic such as one derived from a Minimum Spanning Tree (MST) or nearest-neighbor distance would be preferred to guarantee optimality.
 """
