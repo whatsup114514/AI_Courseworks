@@ -206,12 +206,6 @@ if __name__ == "__main__":
     print(f"Total Distance: {astar_distances} km", )
     print("Number of Expanded States (CLOSED size):", astar_closed)
 
-    # Compare results
-    print("\nConclusion:")
-    print("A* search uses the straight-line heuristic to guide the search,")
-    print("resulting in fewer node expansions and guaranteed optimality.")
-    print(f"For the ASEAN TSP, the optimal route is approximately {astar_distances} km")
-
 
 # ======================================================
 # Reflection
