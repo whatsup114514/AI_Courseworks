@@ -16,7 +16,7 @@ Best-First Search and A* Search algorithms.
 
 References:
 - Russell & Norvig (2016), Artificial Intelligence: A Modern Approach
-- Lecture Slides: 5–7 (Best-First), 22–23 (A*), 32–33 (Heuristics), 46 (Generator)
+- Lecture Slides: 4–20 (Best-First), 22–23 (A*), 32–33 (Heuristics),
 - Search Summaries: 3 and 6
 
 Note: Although the assignment hint mentions an approximate distance of 956 km,
@@ -216,13 +216,11 @@ if __name__ == "__main__":
 # ======================================================
 # Reflection
 # ======================================================
+
 """
-Compared with the UK city example discussed in class, the ASEAN TSP instance in this assignment was more straightforward to analyze because it involved fewer nodes and the distance data were already specified. 
-From an algorithmic perspective, substituting UK cities with ASEAN ones did not alter the fundamental search structure. 
-The heuristic function h(n) still relied on straight-line distance, consistent with the principles outlined in the course slides (Slides 32–33).
-However, in practical geographic terms, ASEAN cities are characterized by more winding road networks and varying elevations, making the straight-line distance a less precise estimator of the actual travel cost. 
-While I briefly considered adjusting the heuristic to account for these environmental factors, I ultimately retained the original formulation to ensure that the heuristic remained admissible, as required for demonstrating the optimality of the A* algorithm.
-It is also worth noting that the heuristic formula defined in the assignment—summing the straight-line distances from the current city to all unvisited cities plus the return distance to the start—can slightly overestimate the remaining path cost in larger TSP instances. 
-Nevertheless, for this four-city ASEAN case, the heuristic remains sufficiently accurate for instructional purposes and effectively demonstrates the contrast between uninformed (Best-First) and informed (A*) search strategies. 
-In more complex real-world TSP applications, a tighter admissible heuristic, such as one derived from a Minimum Spanning Tree (MST) or nearest-neighbor distance, would be preferred to improve efficiency while guaranteeing optimality.
+Compared with the UK city example discussed in class, the ASEAN TSP instance was easier to analyze due to fewer cities and predefined distance data. 
+Algorithmically, replacing UK cities with ASEAN ones did not change the core A* structure—f(n) = g(n) + h(n)—where h(n) still represents straight-line distance as outlined in the lecture slides.
+In the UK example, h(n) referred to the distance to a single goal (e.g., King’s Lynn), but here it was generalized to estimate the remaining tour cost in a multi-city route, ensuring admissibility. 
+Although ASEAN cities have more winding roads and varied terrain, which make straight-line distance less accurate, I retained the original heuristic to maintain optimality.
+Overall, the heuristic performs adequately for this small four-city problem and effectively illustrates the difference between uninformed (Best-First) and informed (A*) search. 
 """
