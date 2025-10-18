@@ -18,6 +18,10 @@ References:
 - Russell & Norvig (2016), Artificial Intelligence: A Modern Approach
 - Lecture Slides: 5–7 (Best-First), 22–23 (A*), 32–33 (Heuristics), 46 (Generator)
 - Search Summaries: 3 and 6
+
+Note: Although the assignment hint mentions an approximate distance of 956 km,
+ the value 1210 km in this implementation reflects the actual road distances defined
+ in the provided ASEAN dataset (search summaries 3 and 6).
 """
 
 import heapq  # used for the priority queue (OPEN list)
@@ -188,7 +192,7 @@ if __name__ == "__main__":
     print("A* search uses the straight-line heuristic to guide the search,")
     print("resulting in fewer node expansions and guaranteed optimality.")
     print(f"For the ASEAN TSP, the optimal route is approximately {astar_distances} km")
-    print("(KUL → IPH → GT → KB → KUL).")
+
 
 # ======================================================
 # Reflection
